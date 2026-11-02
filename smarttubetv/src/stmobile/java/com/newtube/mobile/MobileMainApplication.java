@@ -166,6 +166,7 @@ public class MobileMainApplication extends MainApplication {
         // Keep ALL existing TV init: Conscrypt, GlobalPreferences, multidex, the
         // global exception handler and every other View->Activity mapping.
         super.onCreate();
+        com.newtube.mobile.ui.playback.QueuePersistence.install(this);
         if (new com.newtube.mobile.alerts.UploadAlertStore(this).automatic())
             com.newtube.mobile.alerts.UploadAlerts.reconcile(this, false);
 

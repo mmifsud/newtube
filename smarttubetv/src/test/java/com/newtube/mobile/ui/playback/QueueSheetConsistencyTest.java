@@ -112,4 +112,11 @@ public class QueueSheetConsistencyTest {
         assertSame(a, queue.getCurrent()); assertSame(c, queue.getNext());
         assertTrue(adapter.matchesLiveQueue());
     }
+    @Test public void restoredCurrentIsSelectableWithoutPretendingPlaybackAlreadyStarted() {
+        queue.restoreQueue(Arrays.asList(a, b, c), 1); adapter.reload();
+        assertTrue(queue.isRestoredQueue()); assertNull(played);
+        assertEquals(-1, adapter.currentIndex());
+        assertTrue(adapter.matchesLiveQueue()); assertTrue(adapter.canRemove(1));
+        assertTrue(adapter.play(1)); assertSame(b, played);
+    }
 }

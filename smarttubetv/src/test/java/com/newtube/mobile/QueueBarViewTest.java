@@ -127,6 +127,16 @@ public class QueueBarViewTest implements LifecycleOwner {
         shadowOf(Looper.getMainLooper()).idle();
         assertEquals(View.GONE, bar.getVisibility());
     }
+    @Test public void restoredCursorIsShownAsTheNextSelectableVideoRatherThanSkipped() {
+        queue.restoreQueue(Arrays.asList(a, b, c), 1);
+        shadowOf(Looper.getMainLooper()).idle();
+        assertEquals(View.VISIBLE, bar.getVisibility());
+        assertTrue(label().contains(b.title));
+        assertTrue(label().contains("2 videos remaining"));
+        assertTrue(queue.isRestoredQueue());
+        queue.clearExceptCurrent(); shadowOf(Looper.getMainLooper()).idle();
+        assertEquals(View.GONE, bar.getVisibility()); assertTrue(queue.getAll().isEmpty());
+    }
     @Test public void lastQueuedVideoKeepsBarAfterBackgroundAdvanceConsumesLaunchFlag() {
         queue.add(a); queue.setCurrent(a);
         b.fromQueue = true; queue.next(b);

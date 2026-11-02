@@ -80,6 +80,14 @@ public class PlaylistListenerTest {
         }
         assertEquals(0, changes.get());
     }
+    @Test public void restoredSnapshotIsOneStateAndSelectedDuplicateUsesItsActualPosition() {
+        Video otherA = video(a.videoId);
+        changes.set(0); queue.restoreQueue(Arrays.asList(a, b, otherA), 2);
+        assertEquals(1, changes.get()); assertTrue(queue.isRestoredQueue());
+        assertSame(otherA, queue.getCurrent());
+        queue.setCurrent(otherA);
+        assertEquals(2, queue.getCurrentIndex()); assertFalse(queue.isRestoredQueue());
+    }
 
     @Test public void explicitQueueSurvivesConsumedRoutingFlagsAndClearResetsIt() {
         assertFalse(queue.hasExplicitQueue());

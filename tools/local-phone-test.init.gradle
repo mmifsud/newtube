@@ -22,9 +22,9 @@ gradle.beforeProject { project ->
             def debug = android.buildTypes.getByName('debug')
             debug.signingConfig = signing
             debug.applicationIdSuffix = '.resumetest'
-            debug.versionNameSuffix = '-test-r6'
+            debug.versionNameSuffix = '-test-r7'
             debug.buildConfigField 'boolean', 'IN_APP_UPDATES', 'false'
-            android.productFlavors.getByName('stmobile').versionCode = 11706
+            android.productFlavors.getByName('stmobile').versionCode = 11707
             android.sourceSets.getByName('debug').res.srcDir(new File(project.rootDir, 'tools/local-phone-test/res'))
         }
     }
