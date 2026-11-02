@@ -16,6 +16,9 @@ public class Playlist {
     private final List<Video> mPlaylist;
     private final List<Video> mSyncedItems;
     private int mCurrentIndex;
+    // fromQueue is a one-open routing flag consumed by VideoLoaderController. It cannot tell
+    // UI whether this session still contains a queue the user explicitly built.
+    private boolean mHasExplicitQueue;
     private static Playlist sInstance;
     private final java.util.concurrent.CopyOnWriteArrayList<Runnable> mListeners =
             new java.util.concurrent.CopyOnWriteArrayList<>();
@@ -56,13 +59,19 @@ public class Playlist {
     public void clear() {
         mPlaylist.clear();
         mCurrentIndex = -1;
+        mHasExplicitQueue = false;
         notifyChanged();
     }
 
     /** Clears the queue in one pass and emits one complete state, preserving the playing object. */
     public void clearExceptCurrent() {
         Video current = getCurrent();
-        if (mPlaylist.isEmpty() || (mPlaylist.size() == 1 && current != null)) return;
+        boolean hadExplicitQueue = mHasExplicitQueue;
+        mHasExplicitQueue = false;
+        if (mPlaylist.isEmpty() || (mPlaylist.size() == 1 && current != null)) {
+            if (hadExplicitQueue) notifyChanged();
+            return;
+        }
         for (Video video : mPlaylist) {
             if (video != null && video != current) video.fromQueue = false;
         }
@@ -81,6 +90,9 @@ public class Playlist {
      * Used to sync list with remotely added items
      */
     public void addAll(List<Video> videos) {
+        for (Video video : videos) {
+            if (video != null && video.fromQueue) mHasExplicitQueue = true;
+        }
         mPlaylist.removeAll(videos);
         mPlaylist.addAll(videos);
         notifyChanged();
@@ -101,6 +113,7 @@ public class Playlist {
         // Skip add currently playing item
         // And replace to correct position sync in fragments
         if (video.equals(current)) {
+            if (video.fromQueue) mHasExplicitQueue = true;
             replace(current, video);
             return;
         }
@@ -108,6 +121,7 @@ public class Playlist {
         boolean isLastElement = !mPlaylist.isEmpty() && video.equals(mPlaylist.get(mPlaylist.size() - 1));
 
         remove(video);
+        if (video.fromQueue) mHasExplicitQueue = true;
 
         mPlaylist.add(video);
 
@@ -129,6 +143,7 @@ public class Playlist {
         }
 
         remove(video);
+        if (video.fromQueue) mHasExplicitQueue = true;
 
         int nextIdx = mPlaylist.size() > mCurrentIndex ? mCurrentIndex + 1 : mPlaylist.size() - 1;
 
@@ -161,6 +176,7 @@ public class Playlist {
         // If contains
         if (index >= 0) {
             mPlaylist.remove(video);
+            if (mPlaylist.isEmpty()) mHasExplicitQueue = false;
 
             // Shift video stack index if needed
             // Don't remove current index. Except this is the last element.
@@ -322,6 +338,11 @@ public class Playlist {
 
     public boolean hasNext() {
         return getNext() != null;
+    }
+
+    /** Retain access to a user-built queue after its final item starts, until it is cleared. */
+    public boolean hasExplicitQueue() {
+        return mHasExplicitQueue;
     }
 
     public List<Video> getAllAfterCurrent() {

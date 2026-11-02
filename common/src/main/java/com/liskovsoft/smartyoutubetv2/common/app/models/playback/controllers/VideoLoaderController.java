@@ -73,7 +73,7 @@ public class VideoLoaderController extends BasePlayerController {
                 + " pos=" + (getPlayer() != null ? getPlayer().getPositionMs() : -1));
         mReloadDispatching = true;
         try {
-            getMainController().onNewVideo(video);
+            getMainController().reloadVideo(video);
         } finally {
             mReloadDispatching = false;
         }

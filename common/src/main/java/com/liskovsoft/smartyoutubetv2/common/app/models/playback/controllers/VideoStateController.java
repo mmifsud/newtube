@@ -34,6 +34,8 @@ public class VideoStateController extends BasePlayerController {
     private boolean mIsPlayEnabled;
     private boolean mIsPlayBlocked;
     private int mTickleLeft;
+    public boolean isIncognitoSession() { return mIncognito; }
+
     private boolean mIncognito;
     private final Runnable mUpdateHistory = this::saveState;
     private long mNewVideoTimeMs;
@@ -144,6 +146,7 @@ public class VideoStateController extends BasePlayerController {
 
     @Override
     public void onEngineInitialized() {
+        if (getPlayer() != null) getPlayer().setPlayWhenReady(getPlayEnabled());
         // Reset auto-save history timer
         mTickleLeft = 0;
 

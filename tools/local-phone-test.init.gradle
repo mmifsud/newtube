@@ -1,0 +1,31 @@
+// Private acceptance packaging. Credentials remain outside the repository.
+gradle.beforeProject { project ->
+    project.plugins.withId('com.android.application') {
+        project.androidComponents.finalizeDsl { android ->
+            def path = project.findProperty('phoneTestCredentials')
+            if (path == null) throw new GradleException('Existing private test signing credentials are required.')
+            def file = new File(path.toString())
+            def credentials = new groovy.json.JsonSlurper().parse(file)
+            if (credentials.keystore != 'newtube-test.p12') throw new GradleException('Unexpected test keystore name.')
+            def key = new File(file.parentFile, credentials.keystore)
+            def store = java.security.KeyStore.getInstance('PKCS12')
+            key.withInputStream { store.load(it, credentials.password.toCharArray()) }
+            def fingerprint = java.security.MessageDigest.getInstance('SHA-256').digest(store.getCertificate(credentials.alias).encoded)
+                    .collect { String.format('%02x', it & 0xff) }.join()
+            if (fingerprint != '945ffbd54b034ffbbf349e17d72130b18e3e4163d3d0991287b736a45a7488c3') throw new GradleException('Test signing identity mismatch.')
+            def signing = android.signingConfigs.maybeCreate('privatePhoneTest')
+            signing.storeFile = key
+            signing.storeType = 'PKCS12'
+            signing.storePassword = credentials.password
+            signing.keyPassword = credentials.password
+            signing.keyAlias = credentials.alias
+            def debug = android.buildTypes.getByName('debug')
+            debug.signingConfig = signing
+            debug.applicationIdSuffix = '.resumetest'
+            debug.versionNameSuffix = '-test-r6'
+            debug.buildConfigField 'boolean', 'IN_APP_UPDATES', 'false'
+            android.productFlavors.getByName('stmobile').versionCode = 11706
+            android.sourceSets.getByName('debug').res.srcDir(new File(project.rootDir, 'tools/local-phone-test/res'))
+        }
+    }
+}

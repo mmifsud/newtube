@@ -81,6 +81,30 @@ public class PlaylistListenerTest {
         assertEquals(0, changes.get());
     }
 
+    @Test public void explicitQueueSurvivesConsumedRoutingFlagsAndClearResetsIt() {
+        assertFalse(queue.hasExplicitQueue());
+        c.fromQueue = true; queue.next(c);
+        c.fromQueue = false; queue.setCurrent(c);
+        assertTrue(queue.hasExplicitQueue());
+        queue.clearExceptCurrent();
+        assertFalse(queue.hasExplicitQueue());
+        assertSame(c, queue.getCurrent());
+        b.fromQueue = true; queue.add(b);
+        b.fromQueue = false; queue.setCurrent(b);
+        assertTrue(queue.hasExplicitQueue());
+        queue.clear(); assertFalse(queue.hasExplicitQueue());
+    }
+
+    @Test public void removingAllPendingItemsDoesNotTurnLaterHistoryIntoAQueue() {
+        queue.clear();
+        c.fromQueue = true; queue.add(c);
+        assertTrue(queue.hasExplicitQueue());
+        queue.remove(c);
+        queue.add(a); queue.setCurrent(a);
+        queue.add(b); queue.setCurrent(b);
+        assertFalse(queue.hasExplicitQueue());
+    }
+
     @Test public void listenerMayUnregisterDuringNotification() {
         Runnable[] once = new Runnable[1];
         once[0] = () -> queue.removeListener(once[0]);

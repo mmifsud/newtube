@@ -359,6 +359,7 @@ def registerEmbeddedArtProfile(variant) {
 }
 
 dependencies {
+    implementation 'androidx.work:work-runtime:' + workVersion
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 
     implementation 'androidx.annotation:annotation:' + annotationXVersion

@@ -110,6 +110,14 @@ public final class SettingsPageFragment extends Fragment implements SettingsAdap
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        if (SettingsPages.UPLOAD_ALERTS.equals(mPageId)) {
+            androidx.work.WorkManager work = androidx.work.WorkManager.getInstance(requireContext());
+            work.getWorkInfosForUniqueWorkLiveData(com.newtube.mobile.alerts.UploadAlerts.MANUAL)
+                    .observe(getViewLifecycleOwner(), infos -> { if (mAdapter != null) rebuild(); });
+            work.getWorkInfosForUniqueWorkLiveData(com.newtube.mobile.alerts.UploadAlerts.PERIODIC)
+                    .observe(getViewLifecycleOwner(), infos -> { if (mAdapter != null) rebuild(); });
+        }
+
         if (SettingsPages.ROOT.equals(mPageId)) {
             View search = view.findViewById(R.id.settings_search_field);
             search.setVisibility(View.VISIBLE);
@@ -166,6 +174,10 @@ public final class SettingsPageFragment extends Fragment implements SettingsAdap
             mDialog.dismiss();
             mDialog = null;
         }
+        if (mList != null) mList.setAdapter(null);
+        mAdapter = null;
+        mList = null;
+        mTitle = null;
         super.onDestroyView();
     }
 

@@ -1,0 +1,31 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources><string name="upload_alerts_auto">Automatic checks</string>
+<string name="upload_alerts_auto_summary">Off by default. Checks selected channels in the background when the battery is not low. Android may delay checks.</string>
+<string name="upload_alerts_channels">Selected channels</string>
+<string name="upload_alerts_disable_channel">Remove channel from local upload alerts</string>
+<string name="upload_alerts_enable_channel">Select channel for local upload alerts</string>
+<string name="upload_alerts_explanation">Local alerts for new uploads from channels you select here. These selections are separate from YouTube’s bell settings and are shared across accounts on this device. The first successful check records existing videos without alerting. Android may delay background checks. Only uploads available in the public feed can be detected; this is not the YouTube notification inbox.</string>
+<string name="upload_alerts_hourly">Every hour</string>
+<string name="upload_alerts_interval">Check interval</string>
+<string name="upload_alerts_last">Last check: %1$s. Channels checked: %2$d. Could not check: %3$d. New uploads: %4$d.</string>
+<string name="upload_alerts_limit">Could not select this channel. The limit is 50 channels.</string>
+<string name="upload_alerts_never">No completed check yet.</string>
+<string name="upload_alerts_permission">Allow notifications</string>
+<string name="upload_alerts_permission_summary">Channel alerts need notification permission and an enabled notification category.</string>
+<string name="upload_alerts_permission_then_sync">Allow notifications, then tap Sync now again.</string>
+<string name="upload_alerts_queued">Check queued. Waiting for an allowed network or another check to finish.</string>
+<string name="upload_alerts_removed">Upload alerts removed for this channel.</string>
+<string name="upload_alerts_root_summary">Selected channels, scheduled checks, and Sync now</string>
+<string name="upload_alerts_running">Checking selected channels…</string>
+<string name="upload_alerts_select_first">Open a channel and select its upload-alert bell first.</string>
+<string name="upload_alerts_select_help">Open a channel and tap its bell to select it. Switch a channel off here to remove it. Channel limit: %1$d.</string>
+<string name="upload_alerts_selected">Channel selected. Configure checks under Settings → Channel upload alerts.</string>
+<string name="upload_alerts_six_hours">Every 6 hours</string>
+<string name="upload_alerts_sync">Sync now</string>
+<string name="upload_alerts_sync_summary">Check selected channels once, even when automatic checks are off.</string>
+<string name="upload_alerts_three_hours">Every 3 hours</string>
+<string name="upload_alerts_title">Channel upload alerts</string>
+<string name="upload_alerts_twelve_hours">Every 12 hours</string>
+<string name="upload_alerts_unmetered">Unmetered networks only</string>
+<string name="upload_alerts_unmetered_summary">Applies to scheduled checks and Sync now. Usually Wi-Fi; metered connections wait.</string>
+</resources>

@@ -58,6 +58,11 @@
             android:textStyle="bold"
             tools:text="Some Channel" />
 
+        <ImageButton android:id="@+id/mobile_channel_upload_alerts"
+            android:layout_width="48dp" android:layout_height="48dp"
+            android:padding="12dp" android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_upload_alerts" android:contentDescription="@string/upload_alerts_enable_channel" />
+
     </LinearLayout>
 
     <!-- One tab per channel section, in delivery order. Hidden until sections arrive.

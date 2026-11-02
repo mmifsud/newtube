@@ -1,0 +1,200 @@
+{
+  "apk_sha256": "193c74f909cb18137e69d55ea913e199334862a24ae2f1fe5802ec676e343d2b",
+  "package": "io.github.aleixrodriala.arc.resumetest",
+  "version": "1.17.1-test-r4",
+  "version_code": 11704,
+  "signer_sha256": "945ffbd54b034ffbbf349e17d72130b18e3e4163d3d0991287b736a45a7488c3",
+  "tests": {
+    "phone": [
+      {
+        "name": "com.newtube.mobile.CardMenuMigrationTest",
+        "tests": "5",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-11-02T16:19:36.387Z"
+      },
+      {
+        "name": "com.newtube.mobile.QueueBarViewTest",
+        "tests": "9",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-11-02T16:19:36.453Z"
+      },
+      {
+        "name": "com.newtube.mobile.QueueBrowsingLayoutTest",
+        "tests": "9",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-11-02T16:19:51.680Z"
+      },
+      {
+        "name": "com.newtube.mobile.QueueMenuMigrationTest",
+        "tests": "3",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-11-02T16:20:10.388Z"
+      },
+      {
+        "name": "com.newtube.mobile.alerts.UploadAlertRecoveryTest",
+        "tests": "45",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-11-02T16:20:10.641Z"
+      },
+      {
+        "name": "com.newtube.mobile.ui.playback.MobilePlaybackLaunchTest",
+        "tests": "4",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-11-02T16:20:12.479Z"
+      },
+      {
+        "name": "com.newtube.mobile.ui.playback.PlaybackRecoveryTest",
+        "tests": "21",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-11-02T16:20:12.581Z"
+      },
+      {
+        "name": "com.newtube.mobile.ui.playback.QueueCardPolicyTest",
+        "tests": "4",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-11-02T16:20:12.968Z"
+      },
+      {
+        "name": "com.newtube.mobile.ui.playback.QueueSheetConsistencyTest",
+        "tests": "9",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-11-02T16:20:13.027Z"
+      },
+      {
+        "name": "com.newtube.mobile.ui.playback.QueueSheetImagesTest",
+        "tests": "7",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-11-02T16:20:13.162Z"
+      },
+      {
+        "name": "com.newtube.mobile.ui.playback.QueueSheetLifecycleTest",
+        "tests": "7",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-11-02T16:20:16.195Z"
+      },
+      {
+        "name": "com.newtube.mobile.ui.settings.UploadAlertSettingsRecoveryTest",
+        "tests": "9",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-11-02T16:25:51.777Z"
+      }
+    ],
+    "common": [
+      {
+        "name": "com.liskovsoft.smartyoutubetv2.common.app.models.playback.controllers.VideoLoaderControllerNextPrefetchTest",
+        "tests": "13",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-11-02T16:24:46.024Z"
+      },
+      {
+        "name": "com.liskovsoft.smartyoutubetv2.common.app.models.playback.controllers.VideoLoaderControllerUpcomingPollTest",
+        "tests": "4",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-11-02T16:24:46.615Z"
+      },
+      {
+        "name": "com.liskovsoft.smartyoutubetv2.common.app.models.playback.controllers.VideoStateControllerPositionTest",
+        "tests": "10",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-11-02T16:24:46.693Z"
+      },
+      {
+        "name": "com.liskovsoft.smartyoutubetv2.common.app.models.playback.controllers.VideoStateControllerPreviousTest",
+        "tests": "9",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-11-02T16:24:46.838Z"
+      },
+      {
+        "name": "com.liskovsoft.smartyoutubetv2.common.app.models.playback.controllers.VideoLoaderControllerRetryTest",
+        "tests": "6",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-11-02T16:24:46.403Z"
+      },
+      {
+        "name": "com.liskovsoft.smartyoutubetv2.common.app.models.data.PlaylistListenerTest",
+        "tests": "6",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-11-02T16:24:43.068Z"
+      },
+      {
+        "name": "com.liskovsoft.smartyoutubetv2.common.app.models.data.PlaylistMoveTest",
+        "tests": "3",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-11-02T16:24:45.672Z"
+      },
+      {
+        "name": "com.liskovsoft.smartyoutubetv2.common.app.models.playback.QueuePlaybackModeTest",
+        "tests": "8",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-11-02T16:24:45.768Z"
+      },
+      {
+        "name": "com.liskovsoft.smartyoutubetv2.common.app.presenters.dialogs.menu.OwnPlaylistMatchTest",
+        "tests": "5",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-11-02T16:24:47.041Z"
+      }
+    ]
+  },
+  "lint": {
+    "severity_counts": {
+      "Warning": 380,
+      "Error": 808
+    },
+    "changed_java_line_findings": [],
+    "new_helper_findings": [
+      [
+        "Error",
+        "MissingTranslation",
+        29
+      ],
+      [
+        "Warning",
+        "UnusedResources",
+        1
+      ]
+    ]
+  }
+}

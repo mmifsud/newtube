@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
+import android.view.TextureView;
 import android.os.SystemClock;
 import android.view.View;
 
@@ -211,6 +212,11 @@ public final class MiniPlayerBridge {
      * session is active - the codec's output surface never changes, so playback never stalls.
      */
     @Nullable
+    public static boolean attachSessionTexture(TextureView view, SurfaceTexture created, PlaybackSurfaceSession.Lease lease) {
+        MobilePlaybackActivity activity = sActivity.get();
+        return isActive() && activity != null && activity.attachSessionTexture(view, created, lease);
+    }
+
     public static SurfaceTexture getSessionTexture() {
         return isActive() ? sActivity.get().getSessionTexture() : null;
     }

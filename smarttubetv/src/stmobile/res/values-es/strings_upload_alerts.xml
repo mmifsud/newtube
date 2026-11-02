@@ -1,0 +1,31 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources><string name="upload_alerts_auto">Comprobaciones automáticas</string>
+<string name="upload_alerts_auto_summary">Desactivadas por defecto. Comprueba los canales seleccionados en segundo plano cuando la batería no está baja. Android puede retrasarlas.</string>
+<string name="upload_alerts_channels">Canales seleccionados</string>
+<string name="upload_alerts_disable_channel">Quitar el canal de los avisos locales de nuevas subidas</string>
+<string name="upload_alerts_enable_channel">Seleccionar el canal para los avisos locales de nuevas subidas</string>
+<string name="upload_alerts_explanation">Avisos locales de nuevas subidas de los canales que selecciones aquí. Estas selecciones son independientes de la campana de YouTube y se comparten entre las cuentas de este dispositivo. La primera comprobación registra los vídeos existentes sin avisar. Android puede retrasar las comprobaciones. Solo se detectan las subidas disponibles en el feed público; esto no es la bandeja de notificaciones de YouTube.</string>
+<string name="upload_alerts_hourly">Cada hora</string>
+<string name="upload_alerts_interval">Intervalo de comprobación</string>
+<string name="upload_alerts_last">Última comprobación: %1$s. Canales comprobados: %2$d. No se pudieron comprobar: %3$d. Nuevas subidas: %4$d.</string>
+<string name="upload_alerts_limit">No se pudo seleccionar este canal. El límite es de 50 canales.</string>
+<string name="upload_alerts_never">Todavía no se ha completado ninguna comprobación.</string>
+<string name="upload_alerts_permission">Permitir notificaciones</string>
+<string name="upload_alerts_permission_summary">Los avisos necesitan permiso de notificaciones y una categoría de notificaciones activada.</string>
+<string name="upload_alerts_permission_then_sync">Permite las notificaciones y vuelve a pulsar Sincronizar ahora.</string>
+<string name="upload_alerts_queued">Comprobación en cola. Esperando una red permitida o a que termine otra comprobación.</string>
+<string name="upload_alerts_removed">Se han quitado los avisos de este canal.</string>
+<string name="upload_alerts_root_summary">Canales seleccionados, comprobaciones programadas y sincronización manual</string>
+<string name="upload_alerts_running">Comprobando los canales seleccionados…</string>
+<string name="upload_alerts_select_first">Abre un canal y selecciona primero su campana de avisos.</string>
+<string name="upload_alerts_select_help">Abre un canal y toca su campana para seleccionarlo. Desactívalo aquí para quitarlo. Límite de canales: %1$d.</string>
+<string name="upload_alerts_selected">Canal seleccionado. Configura las comprobaciones en Ajustes → Avisos de nuevas subidas.</string>
+<string name="upload_alerts_six_hours">Cada 6 horas</string>
+<string name="upload_alerts_sync">Sincronizar ahora</string>
+<string name="upload_alerts_sync_summary">Comprueba una vez los canales seleccionados, incluso con las comprobaciones automáticas desactivadas.</string>
+<string name="upload_alerts_three_hours">Cada 3 horas</string>
+<string name="upload_alerts_title">Avisos de nuevas subidas</string>
+<string name="upload_alerts_twelve_hours">Cada 12 horas</string>
+<string name="upload_alerts_unmetered">Solo redes sin uso medido</string>
+<string name="upload_alerts_unmetered_summary">Se aplica a las comprobaciones programadas y a Sincronizar ahora. Normalmente Wi-Fi; se espera si la conexión es de uso medido.</string>
+</resources>

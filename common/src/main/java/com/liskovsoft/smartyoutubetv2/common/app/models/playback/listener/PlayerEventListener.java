@@ -7,6 +7,7 @@ import com.liskovsoft.smartyoutubetv2.common.misc.TickleManager.TickleListener;
 
 public interface PlayerEventListener extends PlayerUiEventListener, PlayerEngineEventListener, ViewEventListener, TickleListener {
     void onNewVideo(Video item);
+    default void reloadVideo(Video item) { onNewVideo(item); }
     void onMetadata(MediaItemMetadata metadata);
     /**
      * Called after creation of {@link PlayerManager}

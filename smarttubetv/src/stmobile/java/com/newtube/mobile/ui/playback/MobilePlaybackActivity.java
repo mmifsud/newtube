@@ -559,6 +559,36 @@ public class MobilePlaybackActivity extends MobileActivity
      * we immediately discard costs a few hundred ms on a path that only happens after an app
      * update - far cheaper than guarding seven lifecycle methods against a half-built screen.
      */
+    private String playbackAccountScope() {
+        com.liskovsoft.mediaserviceinterfaces.oauth.Account account = MediaServiceManager.instance().getSelectedAccount();
+        if (account == null) {
+            return "signed-out";
+        }
+        String selection = account instanceof com.liskovsoft.googlecommon.service.oauth.YouTubeAccount ? ((com.liskovsoft.googlecommon.service.oauth.YouTubeAccount) account).getPageIdToken() : null;
+        return PlaybackRestoreState.accountScope(account.getName(), account.getEmail(), selection);
+    }
+
+    private void restorePlaybackIfMissing(Bundle savedInstanceState) {
+        PlaybackRestoreState state;
+        if (this.mPresenter.getVideo() == null && !PlayerTransitionBridge.hasPending() && (state = PlaybackRestoreState.read(savedInstanceState, playbackAccountScope())) != null && this.mPresenter.restoreVideo(state.video(), state.playWhenReady)) {
+            NetPath.log("playback-activity restore=selected-video");
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.remove("mobile.playback.restore.v1");
+        Video selected = this.mPresenter != null ? this.mPresenter.getVideo() : null;
+        Video displayed = getVideo();
+        if (this.mPlayer != null && selected != null && displayed != null) {
+            if (Helpers.equals(selected.videoId, displayed.videoId) && this.mExoPlayerController.containsMedia()) {
+                boolean casting = this.mCastSessionManager != null && (this.mCastSessionManager.isConnected() || this.mCastSessionManager.isConnecting());
+                PlaybackRestoreState.save(outState, displayed, this.mPlayer.getCurrentPosition(), this.mPlayer.getPlayWhenReady(), playbackAccountScope(), ((com.liskovsoft.smartyoutubetv2.common.app.models.playback.controllers.VideoStateController) this.mPresenter.getController(com.liskovsoft.smartyoutubetv2.common.app.models.playback.controllers.VideoStateController.class)).isIncognitoSession(), casting);
+            }
+        }
+    }
+
     private void finishIfNothingToPlay(@Nullable Bundle savedInstanceState) {
         if (mPresenter == null) {
             return;
@@ -585,7 +615,7 @@ public class MobilePlaybackActivity extends MobileActivity
      */
     static boolean shouldFinishWithoutVideo(boolean hasSavedState, boolean hasPendingTransition,
             boolean presenterHasVideo) {
-        return !hasSavedState && !hasPendingTransition && !presenterHasVideo;
+        return !hasPendingTransition && !presenterHasVideo;
     }
 
     @Override
@@ -1011,7 +1041,7 @@ public class MobilePlaybackActivity extends MobileActivity
         // NEWTUBE(touch-prefetch, experiment): off unless a debug/benchmark build sets
         // debug.arc.touch_prefetch_ms (see SwitchExperiments); release builds always pass 0.
         long touchPrefetchMs = com.newtube.mobile.player.SwitchExperiments.touchPrefetchStillMs();
-        mRelatedAdapter = new RelatedVideoAdapter(this::onRelatedClicked,
+        mRelatedAdapter = new RelatedVideoAdapter(this::onRelatedClicked, this::onRelatedLongClicked,
                 touchPrefetchMs > 0 ? this::onRelatedPressed : null, touchPrefetchMs);
         mWatchRelated.setLayoutManager(new LinearLayoutManager(this));
         mWatchRelated.setNestedScrollingEnabled(false);
@@ -1025,7 +1055,7 @@ public class MobilePlaybackActivity extends MobileActivity
         // Queue list: same row layout and same click routing as Up next, but it scrolls INSIDE the
         // card (nested scrolling on + a max height) so a long playlist can't push the rest of the
         // watch page off the bottom. Rows are re-bound on every video change, so no fixed size.
-        mQueueAdapter = new RelatedVideoAdapter(this::onRelatedClicked);
+        mQueueAdapter = new RelatedVideoAdapter(this::onRelatedClicked, this::onRelatedLongClicked);
         mQueueList.setLayoutManager(new LinearLayoutManager(this));
         mQueueList.setHasFixedSize(false);
         mQueueList.setAdapter(mQueueAdapter);
@@ -1316,8 +1346,8 @@ public class MobilePlaybackActivity extends MobileActivity
         // Persistent surface: PlayerView owns no surface (surface_type="none"); hand the
         // session-long Surface to each new player instance. On the very first open the texture
         // may not exist yet - the SurfaceTextureListener attaches it on availability.
-        if (mSessionSurface != null) {
-            mPlayer.setVideoSurface(mSessionSurface);
+        if (mVideoSurface.surface() != null) {
+            mPlayer.setVideoSurface(mVideoSurface.surface());
         }
         // The stock black shutter only lifts on a "rendered first frame" event tied to
         // PlayerView-owned surfaces; with the external surface it would sit over the loading
@@ -2953,7 +2983,7 @@ public class MobilePlaybackActivity extends MobileActivity
         Video video = getVideo();
         boolean textureAttached = mVideoTexture != null && mVideoTexture.getParent() != null;
         boolean textureAvailable = mVideoTexture != null && mVideoTexture.isAvailable();
-        boolean surfaceValid = mSessionSurface != null && mSessionSurface.isValid();
+        boolean surfaceValid = mVideoSurface.surface() != null;
         int playbackState = mPlayer != null ? mPlayer.getPlaybackState() : -1;
         boolean playWhenReady = mExoPlayerController != null
                 && mExoPlayerController.getPlayWhenReady();
@@ -4809,8 +4839,8 @@ public class MobilePlaybackActivity extends MobileActivity
     // ---------------------------------------------------------------------------------
 
     private TextureView mVideoTexture;
-    private SurfaceTexture mSessionTexture;
-    private Surface mSessionSurface;
+    private final PlaybackSurfaceSession mVideoSurface = new PlaybackSurfaceSession();
+    private final PlaybackSurfaceSession.Lease mWatchSurfaceLease = new PlaybackSurfaceSession.Lease();
     private ImageView mVideoStill;
     /** Loading-still state: waiting for the NEW stream's STATE_READY... */
     private boolean mStillAwaitReady;
@@ -4854,22 +4884,7 @@ public class MobilePlaybackActivity extends MobileActivity
     private final TextureView.SurfaceTextureListener mVideoTextureListener = new TextureView.SurfaceTextureListener() {
         @Override
         public void onSurfaceTextureAvailable(SurfaceTexture texture, int width, int height) {
-            if (mSessionTexture == null) {
-                // Very first availability: adopt this texture for the whole session.
-                mSessionTexture = texture;
-                mSessionSurface = new Surface(texture);
-                if (mPlayer != null) {
-                    mPlayer.setVideoSurface(mSessionSurface);
-                }
-            } else if (texture != mSessionTexture) {
-                // The view re-created its texture (re-attach after mini / return from background):
-                // swap the session texture back in. The codec kept decoding into it all along, so
-                // the live stream shows within a frame or two. The fresh texture is discarded.
-                mVideoTexture.setSurfaceTexture(mSessionTexture);
-                texture.release();
-            }
-            logPip("surface-available size=" + width + 'x' + height
-                    + " adopted=" + (texture == mSessionTexture ? "y" : "n"));
+            attachSessionTexture(mVideoTexture, texture, mWatchSurfaceLease);
         }
 
         @Override
@@ -4878,12 +4893,7 @@ public class MobilePlaybackActivity extends MobileActivity
 
         @Override
         public boolean onSurfaceTextureDestroyed(SurfaceTexture texture) {
-            // NEVER let a view release the session texture - that would detach the codec's
-            // surface and force the re-init this whole design exists to avoid. Disposable
-            // (never-adopted) textures may be released normally.
-            boolean release = texture != mSessionTexture;
-            logPip("surface-destroyed release=" + (release ? "y" : "n"));
-            return release;
+            return mWatchSurfaceLease.shouldRelease(texture);
         }
 
         @Override
@@ -4994,7 +5004,7 @@ public class MobilePlaybackActivity extends MobileActivity
 
     /** Session-long video texture, handed to the Browse mini card (see MiniPlayerBridge). */
     SurfaceTexture getSessionTexture() {
-        return mSessionTexture;
+        return mVideoSurface.texture();
     }
 
     /** Detach the TextureView so the session texture is free for another view's GL consumer. */
@@ -5297,21 +5307,14 @@ public class MobilePlaybackActivity extends MobileActivity
         return true;
     }
 
-    private void releaseSessionTexture() {
-        if (mSessionSurface != null) {
-            mSessionSurface.release();
-            mSessionSurface = null;
-        }
-        if (mSessionTexture != null) {
-            // If the texture is still displayed by the Browse card (we died while minimized) the
-            // card's own detach releases it again - a double release is tolerated natively.
-            try {
-                mSessionTexture.release();
-            } catch (RuntimeException ignored) {
-            }
-            mSessionTexture = null;
-        }
+    boolean attachSessionTexture(TextureView view, SurfaceTexture created, PlaybackSurfaceSession.Lease lease) {
+        if (isFinishing() || isDestroyed()) return false;
+        return mVideoSurface.attach(view, created, lease, surface -> {
+            if (mPlayer != null) mPlayer.setVideoSurface(surface);
+        });
     }
+
+    private void releaseSessionTexture() { mVideoSurface.release(); }
 
     // ---------------------------------------------------------------------------------
     // NEWTUBE(gestures): the player's swipes (PlayerContainerLayout.SwipeListener, issue #12).
@@ -6512,7 +6515,8 @@ public class MobilePlaybackActivity extends MobileActivity
         runOnUiThread(() -> {
             mSuggestionVideos.remove(group.getId());
             mSuggestionGroups.remove(group.getId());
-            rebuildRelatedList();
+            if (group.getType() == MediaGroup.TYPE_PLAYBACK_QUEUE) refreshQueueSuggestions();
+            else rebuildRelatedList();
         });
     }
 
@@ -6587,12 +6591,13 @@ public class MobilePlaybackActivity extends MobileActivity
             if (mRelatedAdapter != null) {
                 mRelatedAdapter.submitList(new ArrayList<>());
             }
-            // Hide the queue card until the new video's rows say it's still in one. mQueueExpanded
-            // is deliberately NOT reset: staying open across an in-queue advance is the point.
-            if (mQueueCard != null) {
+            // Recommendations can reset while the same explicit queue keeps playing. Keep that
+            // card and its rows visible until the fresh local snapshot renders; no /next wait.
+            boolean keepLocalQueue = QueueCardPolicy.keepsExplicitQueue(getVideo());
+            if (mQueueCard != null && !keepLocalQueue) {
                 mQueueCard.setVisibility(View.GONE);
             }
-            if (mQueueAdapter != null) {
+            if (mQueueAdapter != null && !keepLocalQueue) {
                 mQueueAdapter.submitList(new ArrayList<>());
             }
             if (mWatchRelatedLabel != null) {
@@ -6603,6 +6608,9 @@ public class MobilePlaybackActivity extends MobileActivity
             // A new video is loading: the video itself starts first (by design), so show the
             // pulsing "up next" skeleton until the related feed lands.
             showRelatedSkeleton();
+            // A metadata/next-video refresh clears recommendations, not the user's queue.
+            // Rebuild its local snapshot even when background playback has no new /next result.
+            refreshQueueSuggestions();
         });
     }
 
@@ -8325,6 +8333,14 @@ public class MobilePlaybackActivity extends MobileActivity
         }
     }
 
+    private boolean onRelatedLongClicked(Video video) {
+        if (mPresenter == null || video == null || isFinishing() || isDestroyed()) {
+            return false;
+        }
+        mPresenter.onSuggestionItemLongClicked(video);
+        return true;
+    }
+
     private void onRelatedClicked(Video video) {
         onRelatedClicked(video, null);
     }
@@ -8428,15 +8444,19 @@ public class MobilePlaybackActivity extends MobileActivity
     private void refreshQueueSuggestions() {
         String title = getString(R.string.action_playback_queue);
         int id = title.hashCode();
-        // null, not empty, when the playing video is the last one (Playlist.getAllAfterCurrent).
-        List<Video> next = Playlist.instance().getAllAfterCurrent();
+        // Keep a user-built queue at its final entry; upcoming-only rows would erase its header.
+        List<Video> next = QueueCardPolicy.keepsExplicitQueue(getVideo())
+                ? Playlist.instance().getAll() : Playlist.instance().getAllAfterCurrent();
         if (next == null || next.isEmpty()) {
-            boolean removed = mSuggestionVideos.remove(id) != null;
+            mSuggestionVideos.remove(id);
             mSuggestionGroups.remove(id);
-            if (removed) rebuildRelatedList();
+            rebuildRelatedList();
             return;
         }
-        if (QueueCardPolicy.sameItems(mSuggestionVideos.get(id), next)) return;
+        if (QueueCardPolicy.sameItems(mSuggestionVideos.get(id), next)) {
+            rebuildRelatedList(); // resuming can need a render even when membership is unchanged
+            return;
+        }
         VideoGroup group = VideoGroup.from(new ArrayList<>(next));
         group.setTitle(title);
         group.setId(id);

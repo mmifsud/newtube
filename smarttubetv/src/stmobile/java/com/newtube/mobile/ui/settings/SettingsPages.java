@@ -50,6 +50,7 @@ public final class SettingsPages {
     public static final String DEARROW = "dearrow";
     public static final String BACKUP = "backup";
     public static final String ADVANCED = "advanced";
+    public static final String UPLOAD_ALERTS = "upload_alerts";
     public static final String ABOUT = "about";
 
     /** A built page: its title and rows. */
@@ -69,6 +70,7 @@ public final class SettingsPages {
     @NonNull
     static Page build(@NonNull Context context, @NonNull String id) {
         switch (id) {
+            case UPLOAD_ALERTS: return UploadAlertPages.build(context);
             case GENERAL:
                 return AppPages.general(context);
             case FEEDS:
@@ -124,6 +126,9 @@ public final class SettingsPages {
                 context.getString(R.string.mobile_settings_feeds_summary), FEEDS));
         rows.add(SettingsRow.page(R.drawable.ic_settings_privacy, context.getString(R.string.mobile_settings_privacy),
                 context.getString(R.string.mobile_settings_privacy_summary), PRIVACY));
+
+        rows.add(SettingsRow.page(R.drawable.ic_upload_alerts, context.getString(R.string.upload_alerts_title),
+                context.getString(R.string.upload_alerts_root_summary), UPLOAD_ALERTS));
 
         rows.add(SettingsRow.header(context.getString(R.string.mobile_settings_group_video)));
         rows.add(SettingsRow.page(R.drawable.ic_settings_playback, context.getString(R.string.mobile_settings_playback),

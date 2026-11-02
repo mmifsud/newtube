@@ -59,8 +59,8 @@ public class MobilePlaybackLaunchTest {
      * in the presenter; it must never be mistaken for a bare relaunch.
      */
     @Test
-    public void configurationRecreateIsNeverTreatedAsEmpty() {
-        assertFalse(MobilePlaybackActivity.shouldFinishWithoutVideo(true, false, false));
+    public void restoredHierarchyRequiresLiveVideoOrPendingOpen() {
+        assertTrue(MobilePlaybackActivity.shouldFinishWithoutVideo(true, false, false));
         assertFalse(MobilePlaybackActivity.shouldFinishWithoutVideo(true, false, true));
         assertFalse(MobilePlaybackActivity.shouldFinishWithoutVideo(true, true, false));
     }

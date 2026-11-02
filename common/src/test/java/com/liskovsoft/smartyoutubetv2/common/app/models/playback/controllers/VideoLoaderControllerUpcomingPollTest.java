@@ -105,7 +105,7 @@ public class VideoLoaderControllerUpcomingPollTest {
                 return (PlayerEventListener) Proxy.newProxyInstance(
                         PlayerEventListener.class.getClassLoader(), new Class<?>[] {PlayerEventListener.class},
                         (proxy, method, args) -> {
-                            if (method.getName().equals("onNewVideo")) {
+                            if ((method.getName().equals("onNewVideo") || method.getName().equals("reloadVideo"))) {
                                 Video video = (Video) args[0];
                                 video.fromQueue = true; // Playlist insertion is unrelated here
                                 self.onNewVideo(video);

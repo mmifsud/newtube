@@ -94,6 +94,20 @@ public class VideoStateControllerPositionTest {
     }
 
     @Test
+    public void recreatedEnginePreservesPausedState() {
+        controller.setPlayEnabled(false);
+        controller.onEngineInitialized();
+        assertEquals(List.of(false), playWrites);
+        assertTrue(seeks.isEmpty());
+    }
+
+    @Test
+    public void recreatedEnginePreservesPlayingState() {
+        controller.onEngineInitialized();
+        assertEquals(List.of(true), playWrites);
+    }
+
+    @Test
     public void explicitTimestampSkipsHistorySeekAndPreservesOtherRestoration() {
         State saved = remember(259_957);
         video.pendingPosMs = 1_000;

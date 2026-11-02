@@ -138,6 +138,7 @@ public class MobileChannelActivity extends MobileActivity
         mPresenter = ChannelPresenter.instance(this);
 
         applyChannelTitle();
+        findViewById(R.id.mobile_channel_upload_alerts).setOnClickListener(v -> toggleUploadAlerts());
 
         mPresenter.setView(this);
         mPresenter.onViewInitialized();
@@ -149,11 +150,43 @@ public class MobileChannelActivity extends MobileActivity
      * header (Helpers.firstNonNull(author, title)). NEWTUBE: a channel opened from a link has no
      * card; keep the default header until {@link #update} names it from the loaded videos.
      */
+    private void toggleUploadAlerts() {
+        Video channel = mPresenter != null ? mPresenter.getChannel() : null;
+        String id = mPresenter != null ? mPresenter.getChannelId() : null;
+        if (!com.newtube.mobile.alerts.UploadFeed.channelId(id)) return;
+        com.newtube.mobile.alerts.UploadAlertStore store = new com.newtube.mobile.alerts.UploadAlertStore(this);
+        boolean on = !store.selected(id);
+        if (!store.select(id, mTitleView.getText().toString(), on)) {
+            android.widget.Toast.makeText(this, R.string.upload_alerts_limit, android.widget.Toast.LENGTH_LONG).show();
+            return;
+        }
+        if (!on) androidx.core.app.NotificationManagerCompat.from(this).cancel("channel-upload:" + id, 0);
+        if (on && !com.newtube.mobile.alerts.UploadAlerts.canNotify(this))
+            com.newtube.mobile.alerts.UploadAlerts.requestPermission(this);
+        if (store.automatic()) com.newtube.mobile.alerts.UploadAlerts.reconcile(this, false);
+        updateUploadAlertButton();
+        android.widget.Toast.makeText(this, on ? R.string.upload_alerts_selected : R.string.upload_alerts_removed,
+                android.widget.Toast.LENGTH_SHORT).show();
+    }
+
+    private void updateUploadAlertButton() {
+        View button = findViewById(R.id.mobile_channel_upload_alerts);
+        Video channel = mPresenter != null ? mPresenter.getChannel() : null;
+        String id = mPresenter != null ? mPresenter.getChannelId() : null;
+        boolean valid = com.newtube.mobile.alerts.UploadFeed.channelId(id);
+        boolean selected = valid && new com.newtube.mobile.alerts.UploadAlertStore(this).selected(id);
+        button.setVisibility(valid ? View.VISIBLE : View.GONE);
+        button.setSelected(selected);
+        button.setAlpha(selected ? 1f : .55f);
+        button.setContentDescription(getString(selected ? R.string.upload_alerts_disable_channel : R.string.upload_alerts_enable_channel));
+    }
+
     private void applyChannelTitle() {
         Video channel = mPresenter != null ? mPresenter.getChannel() : null;
         String name = channel != null ? Helpers.firstNonNull(channel.getAuthor(), channel.getTitle()) : null;
         mTitleFromCard = name != null;
         mTitleView.setText(name != null ? name : getString(R.string.header_channels));
+        updateUploadAlertButton();
     }
 
     /** NEWTUBE: name a link-opened channel once its first videos arrive. */
@@ -447,6 +480,7 @@ public class MobileChannelActivity extends MobileActivity
     @Override
     protected void onResume() {
         super.onResume();
+        updateUploadAlertButton();
 
         // REORDER_TO_FRONT may reuse an existing channel Activity, bypassing onCreate entirely.
         // Complete a watch-page channel handoff here as well so that path still becomes mini mode.
@@ -544,6 +578,8 @@ public class MobileChannelActivity extends MobileActivity
         }
 
         runOnUiThread(() -> {
+            if (mTornDown || isFinishing() || isDestroyed()) return;
+            updateUploadAlertButton();
             int id = group.getId();
             Section section = mSections.get(id);
             boolean isNewSection = section == null;

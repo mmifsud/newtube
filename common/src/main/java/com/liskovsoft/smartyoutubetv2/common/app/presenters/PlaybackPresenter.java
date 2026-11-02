@@ -151,6 +151,24 @@ public class PlaybackPresenter extends BasePresenter<PlaybackView> implements Pl
         mIsEmbedPlayerStarted = false;
     }
 
+    public boolean restoreVideo(Video video, boolean playWhenReady) {
+        if (video == null || getVideo() != null) return false;
+        reopenVideo(video, playWhenReady);
+        return true;
+    }
+
+    @Override public void reloadVideo(Video video) {
+        PlaybackView view = getView();
+        if (video != null && view != null) reopenVideo(video, view.getPlayWhenReady());
+    }
+
+    private void reopenVideo(Video video, boolean playWhenReady) {
+        PlaybackView view = getView();
+        if (view != null) view.setPlayWhenReady(playWhenReady);
+        dispatchNewVideo(video, playWhenReady);
+        mIsEmbedPlayerStarted = view != null && view.isEmbed();
+    }
+
     public Video getVideo() {
         return mVideo != null ? mVideo.get() : null;
     }
@@ -252,7 +270,17 @@ public class PlaybackPresenter extends BasePresenter<PlaybackView> implements Pl
 
     @Override
     public void onNewVideo(Video video) {
-        process(listener -> listener.onNewVideo(video));
+        dispatchNewVideo(video, true);
+    }
+
+    private void dispatchNewVideo(Video video, boolean playWhenReady) {
+        process(listener -> {
+            listener.onNewVideo(video);
+            if (listener instanceof VideoStateController) {
+                VideoStateController state = (VideoStateController) listener;
+                if (state.getPlayEnabled() != playWhenReady) state.setPlayEnabled(playWhenReady);
+            }
+        });
         mVideo = new WeakReference<>(video);
         mIsEmbedPlayerStarted = true;
     }
