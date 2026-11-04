@@ -343,9 +343,13 @@ public final class QueueSheet {
             if (!canRemove(position)) {
                 return;
             }
-            Video video = mVideos.remove(position);
+            Video video = mVideos.get(position);
+            if (!Playlist.instance().removeQueuedItem(video)) {
+                requestRefresh();
+                return;
+            }
+            mVideos.remove(position);
             video.fromQueue = false;
-            Playlist.instance().remove(video);
             notifyItemRemoved(position);
             onCountChanged.run();
         }

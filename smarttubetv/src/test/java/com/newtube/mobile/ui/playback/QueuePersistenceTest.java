@@ -111,6 +111,42 @@ public class QueuePersistenceTest {
         assertNotNull(store.read()); assertTrue(store.read().videos.isEmpty());
     }
 
+    private Video privateEntryAfterSessionEnds() {
+        seed();
+        privateMode.set(true);
+        Video secret = video("sssssssssss");
+        secret.fromQueue = true;
+        secret.incognito = true;
+        queue.add(secret);
+        queue.setCurrent(secret);
+        secret.incognito = false; // VideoStateController consumes this routing flag.
+        settle();
+        privateMode.set(false);
+        queue.setCurrent(a);
+        settle();
+        assertFalse(ids(store.read().videos).contains(secret.videoId));
+        return secret;
+    }
+
+    @Test public void playNextCannotForgetPrivateEntryDuringItsTemporaryRemoval() {
+        Video secret = privateEntryAfterSessionEnds();
+        queue.next(secret);
+        settle();
+        assertFalse("Play next must retain the private exclusion", ids(store.read().videos).contains(secret.videoId));
+    }
+
+    @Test public void appendCannotForgetPrivateEntryDuringItsTemporaryRemoval() {
+        Video secret = privateEntryAfterSessionEnds();
+        Video publicVideo = video("ppppppppppp");
+        publicVideo.fromQueue = true;
+        queue.add(publicVideo);
+        settle();
+        queue.add(secret);
+        settle();
+        assertFalse("Append must retain the private exclusion", ids(store.read().videos).contains(secret.videoId));
+        assertTrue(ids(store.read().videos).contains(publicVideo.videoId));
+    }
+
     @Test public void interruptedAtomicWriteKeepsTheLastCompleteSnapshot() throws Exception {
         seed();
         FileOutputStream partial = new AtomicFile(path).startWrite();

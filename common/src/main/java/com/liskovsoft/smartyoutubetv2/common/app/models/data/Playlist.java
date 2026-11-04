@@ -126,7 +126,7 @@ public class Playlist {
 
         boolean isLastElement = !mPlaylist.isEmpty() && video.equals(mPlaylist.get(mPlaylist.size() - 1));
 
-        remove(video);
+        removeInternal(video);
         if (video.fromQueue) mHasExplicitQueue = true;
 
         mPlaylist.add(video);
@@ -148,7 +148,7 @@ public class Playlist {
             return;
         }
 
-        remove(video);
+        removeInternal(video);
         if (video.fromQueue) mHasExplicitQueue = true;
 
         int nextIdx = mPlaylist.size() > mCurrentIndex ? mCurrentIndex + 1 : mPlaylist.size() - 1;
@@ -168,20 +168,40 @@ public class Playlist {
     }
 
     public void remove(Video video) {
+        if (removeInternal(video)) notifyChanged();
+    }
+
+    /** User edits preserve the playing occurrence; a restored cursor is not active playback. */
+    public boolean canRemoveQueuedItem(Video video) {
+        int index = indexOfVideo(video);
+        return index >= 0 && (mRestoredQueue || index != mCurrentIndex);
+    }
+
+    /** Recheck at execution time: playback may advance while a menu is open. */
+    public boolean removeQueuedItem(Video video) {
+        if (!canRemoveQueuedItem(video)) return false;
+        remove(video);
+        return true;
+    }
+
+    private int indexOfVideo(Video video) {
+        if (Video.isEmpty(video)) return -1;
+        int index = indexOfInstance(video);
+        return index >= 0 ? index : mPlaylist.indexOf(video);
+    }
+
+    // Compound add/next operations publish only their completed state. In particular, a
+    // temporary removal must not make persistence forget a requeued item's private status.
+    private boolean removeInternal(Video video) {
         if (Video.isEmpty(video)) {
-            return;
+            return false;
         }
 
-        // Skip remove currently playing item
-        //if (video.equals(getCurrent())) {
-        //    return;
-        //}
-
-        int index = mPlaylist.indexOf(video);
+        int index = indexOfVideo(video);
 
         // If contains
         if (index >= 0) {
-            mPlaylist.remove(video);
+            mPlaylist.remove(index);
             if (mPlaylist.isEmpty()) mHasExplicitQueue = false;
 
             // Shift video stack index if needed
@@ -196,8 +216,9 @@ public class Playlist {
             if (mCurrentIndex >= mPlaylist.size()) {
                 mCurrentIndex = mPlaylist.size() - 1;
             }
-            notifyChanged();
+            return true;
         }
+        return false;
     }
 
     /**
